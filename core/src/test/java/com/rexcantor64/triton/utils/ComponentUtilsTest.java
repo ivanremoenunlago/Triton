@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import static com.rexcantor64.triton.utils.ComponentUtils.SECTION_CHAR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ComponentUtilsTest {
@@ -204,8 +205,8 @@ public class ComponentUtilsTest {
 
         Component result = ComponentUtils.deserializeFromJson(json);
 
-        assertTrue(result.clickEvent().isPresent());
-        ClickEvent clickEvent = result.clickEvent().get();
+        ClickEvent clickEvent = result.clickEvent();
+        assertNotNull(clickEvent);
         assertEquals("run_command", clickEvent.action().name());
         assertEquals("{\"text\":\"/say hi\"}", clickEvent.value());
     }
@@ -219,8 +220,8 @@ public class ComponentUtilsTest {
 
         Component result = ComponentUtils.deserializeFromJson(json);
 
-        assertTrue(result.clickEvent().isPresent());
-        ClickEvent clickEvent = result.clickEvent().get();
+        ClickEvent clickEvent = result.clickEvent();
+        assertNotNull(clickEvent);
         assertEquals("run_command", clickEvent.action().name());
         assertEquals("{\"text\":\"/say hi\"}", clickEvent.value());
     }
