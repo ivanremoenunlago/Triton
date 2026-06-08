@@ -205,7 +205,7 @@ public class ComponentUtilsTest {
 
         Component result = ComponentUtils.deserializeFromJson(json);
 
-        ClickEvent clickEvent = result.clickEvent();
+        ClickEvent clickEvent = result.style().clickEvent();
         assertNotNull(clickEvent);
         assertEquals("run_command", clickEvent.action().name());
         assertEquals("{\"text\":\"/say hi\"}", clickEvent.value());
@@ -220,7 +220,7 @@ public class ComponentUtilsTest {
 
         Component result = ComponentUtils.deserializeFromJson(json);
 
-        ClickEvent clickEvent = result.clickEvent();
+        ClickEvent clickEvent = result.style().clickEvent();
         assertNotNull(clickEvent);
         assertEquals("run_command", clickEvent.action().name());
         assertEquals("{\"text\":\"/say hi\"}", clickEvent.value());
