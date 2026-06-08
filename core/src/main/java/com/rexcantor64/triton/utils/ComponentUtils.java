@@ -1,6 +1,11 @@
 package com.rexcantor64.triton.utils;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSyntaxException;
 import com.rexcantor64.triton.Triton;
 import com.rexcantor64.triton.loader.utils.LoaderFlag;
 import lombok.val;
@@ -69,7 +74,13 @@ public class ComponentUtils {
      * @return The corresponding {@link Component}.
      */
     public static Component deserializeFromJson(@NotNull String json) {
-        return GSON_SERIALIZER.deserialize(json);
+        try {
+            return GSON_SERIALIZER.deserialize(json);
+        } catch (IllegalArgumentException | JsonSyntaxException | IllegalStateException error) {
+            JsonElement parsedJson = JsonParser.parseString(json);
+            JsonElement sanitized = sanitizeComponentJson(parsedJson);
+            return GSON_SERIALIZER.deserializeFromTree(sanitized);
+        }
     }
 
     /**
@@ -80,6 +91,45 @@ public class ComponentUtils {
      */
     public static String serializeToJson(@NotNull Component component) {
         return GSON_SERIALIZER.serialize(component);
+    }
+
+    private static @NotNull JsonElement sanitizeComponentJson(@NotNull JsonElement element) {
+        if (element.isJsonObject()) {
+            JsonObject object = element.getAsJsonObject();
+            if (object.has("clickEvent") && object.get("clickEvent").isJsonObject()) {
+                sanitizeClickEventPayload(object.getAsJsonObject("clickEvent"));
+            }
+            if (object.has("click_event") && object.get("click_event").isJsonObject()) {
+                sanitizeClickEventPayload(object.getAsJsonObject("click_event"));
+            }
+
+            for (String key : new ArrayList<>(object.keySet())) {
+                object.add(key, sanitizeComponentJson(object.get(key)));
+            }
+        } else if (element.isJsonArray()) {
+            JsonArray array = element.getAsJsonArray();
+            for (int i = 0; i < array.size(); i++) {
+                array.set(i, sanitizeComponentJson(array.get(i)));
+            }
+        }
+
+        return element;
+    }
+
+    private static void sanitizeClickEventPayload(@NotNull JsonObject clickEvent) {
+        if (clickEvent.has("value")) {
+            clickEvent.add("value", sanitizePayload(clickEvent.get("value")));
+        }
+        if (clickEvent.has("payload")) {
+            clickEvent.add("payload", sanitizePayload(clickEvent.get("payload")));
+        }
+    }
+
+    private static @NotNull JsonElement sanitizePayload(@NotNull JsonElement payload) {
+        if (payload.isJsonPrimitive() && payload.getAsJsonPrimitive().isString()) {
+            return payload;
+        }
+        return new JsonPrimitive(payload.toString());
     }
 
     /**

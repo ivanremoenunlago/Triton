@@ -3,6 +3,7 @@ package com.rexcantor64.triton.utils;
 import lombok.val;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.junit.jupiter.api.Test;
@@ -192,6 +193,36 @@ public class ComponentUtilsTest {
                 .asComponent();
 
         assertEquals(result.compact(), expected.compact());
+    }
+
+    @Test
+    public void testDeserializeFromJsonWithObjectClickEventPayload() {
+        String json = "{" +
+                "\"text\":\"click me\"," +
+                "\"clickEvent\":{\"action\":\"run_command\",\"value\":{\"text\":\"/say hi\"}}" +
+                "}";
+
+        Component result = ComponentUtils.deserializeFromJson(json);
+
+        assertTrue(result.clickEvent().isPresent());
+        ClickEvent clickEvent = result.clickEvent().get();
+        assertEquals("run_command", clickEvent.action().name());
+        assertEquals("{\"text\":\"/say hi\"}", clickEvent.value());
+    }
+
+    @Test
+    public void testDeserializeFromJsonWithSnakeCaseClickEventPayload() {
+        String json = "{" +
+                "\"text\":\"click me\"," +
+                "\"click_event\":{\"action\":\"run_command\",\"payload\":{\"text\":\"/say hi\"}}" +
+                "}";
+
+        Component result = ComponentUtils.deserializeFromJson(json);
+
+        assertTrue(result.clickEvent().isPresent());
+        ClickEvent clickEvent = result.clickEvent().get();
+        assertEquals("run_command", clickEvent.action().name());
+        assertEquals("{\"text\":\"/say hi\"}", clickEvent.value());
     }
 
 }
